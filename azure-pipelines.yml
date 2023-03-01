@@ -11,7 +11,7 @@ pool:
 
 variables:
   webAppName: 'rajniloadtestwebapp'
-  serviceConnection: 'rajnimca9-LoadTesting-65b18607-dce1-44aa-9b79-59bac7fa0357'
+  serviceConnection: 'loadtestconnection'
   azureSubscriptionId: '65b18607-dce1-44aa-9b79-59bac7fa0357'
   loadTestResource: 'rajni-test'
   loadTestResourceGroup: 'rajniloadtestwebappeastus-rg'
