@@ -8,11 +8,55 @@ trigger:
 
 pool: Default
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+  webAppName: 'rajniloadtestwebapp'
+  serviceConnection: 'loadtestconnection'
+  azureSubscriptionId: '65b18607-dce1-44aa-9b79-59bac7fa0357'
+  loadTestResource: ''
+  loadTestResourceGroup: ''
+  location: 'EAST US'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+
+stages:
+- stage: LoadTest
+  displayName: Load Test
+  dependsOn: Deploy
+  condition: succeeded()
+  jobs:
+  - job: LoadTest
+    displayName: Load Test
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    
+    - task: AzureResourceManagerTemplateDeployment@3
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(serviceConnection)
+        subscriptionId: $(azureSubscriptionId)
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: $(loadTestResourceGroup)
+        location: '$(location)'
+        templateLocation: 'Linked artifact'
+        csmFile: '$(System.DefaultWorkingDirectory)/ARMTemplate/template.json'
+        csmParametersFile: '$(System.DefaultWorkingDirectory)/ARMTemplate/parameters.json'
+        overrideParameters: '-name $(loadTestResource) -location "$(location)"'
+        deploymentMode: 'Incremental'    
+    
+    - task: AzureLoadTest@1
+      inputs:
+        azureSubscription: $(serviceConnection)
+        loadTestConfigFile: 'SampleApp.yaml'
+        resourceGroup: $(loadTestResourceGroup)
+        loadTestResource: $(loadTestResource)
+        env: |
+          [
+            {
+            "name": "webapp",
+            "value": "$(webAppName).azurewebsites.net"
+            }
+          ]
+          
+    - publish: $(System.DefaultWorkingDirectory)/loadTest
+      artifact: results
+
