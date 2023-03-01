@@ -23,8 +23,7 @@ stages:
   jobs:
   - job: Build
     displayName: Build
-    pool:
-      vmImage: windows-latest
+    pool: Default
 
     steps:
 
@@ -47,8 +46,7 @@ stages:
   jobs:
   - job: Deploy
     displayName: Deploy
-    pool:
-      vmImage: windows-latest
+    pool: Default
     
     steps:
     - task: AzureResourceManagerTemplateDeployment@3
@@ -123,8 +121,7 @@ stages:
   jobs:
   - job: LoadTest
     displayName: Load Test
-    pool:
-      vmImage: ubuntu-latest
+    pool: Default
     steps:
     
     - task: AzureResourceManagerTemplateDeployment@3
